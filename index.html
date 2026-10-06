@@ -1,0 +1,563 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Revolution 1848/49 – Zusammenhänge</title>
+<style>
+:root{--bg:#f6f4ef;--ink:#1f2933;--muted:#6b7280;--line:#d9d4c7;--ok:#2f7d4f;--bad:#c0392b;--hh:48px;--th:0px}
+*{box-sizing:border-box}
+body{margin:0;padding-bottom:var(--th);font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink)}
+header{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--line);padding:7px 16px;display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center}
+h1{font-size:16px;margin:0}
+.prog{display:flex;align-items:center;gap:8px;font-weight:600;font-size:13px}
+.bar{width:110px;height:8px;border-radius:4px;background:#e5e1d6;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--ok);transition:width .4s}
+.legend{display:flex;flex-wrap:wrap;gap:2px 12px;font-size:12px;flex:1}
+.legend span{display:inline-flex;align-items:center;gap:4px}
+.legend b{font-size:15px;line-height:1}
+button{font:inherit;cursor:pointer}
+.btn{border:1px solid #1f4e79;background:#1f4e79;color:#fff;border-radius:8px;padding:5px 12px}
+.btn.ghosty{background:#fff;color:#1f4e79}
+.btn[hidden]{display:none}
+#stageWrap{padding:12px;overflow-x:auto}
+#stageBox{position:relative;margin:0 auto}
+#stage{position:absolute;left:0;top:0;transform-origin:0 0}
+#stage svg{position:absolute;left:0;top:0;z-index:1;pointer-events:none}
+.colhead{position:absolute;top:0;height:28px;line-height:28px;text-align:center;color:#fff;font-weight:700;font-size:13px;border-radius:14px;z-index:2}
+.slot{position:absolute;z-index:2;border:2px dashed;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700;transition:background .15s,transform .15s,opacity .3s;
+  border-color:color-mix(in srgb,var(--c) 40%,#fff);background:color-mix(in srgb,var(--c) 5%,#fff);color:color-mix(in srgb,var(--c) 35%,#fff);opacity:.4}
+.slot.open{opacity:1;border-color:var(--c);background:color-mix(in srgb,var(--c) 9%,#fff);color:var(--c);animation:pulse 1.6s infinite}
+.slot.hover{background:color-mix(in srgb,var(--c) 22%,#fff);transform:scale(1.03)}
+.slot.filled{opacity:1;animation:none;border-style:solid;border-color:var(--c);background:color-mix(in srgb,var(--c) 13%,#fff);font-size:13px;font-weight:400;color:var(--ink);padding:10px 12px;text-align:left;justify-content:flex-start;align-items:flex-start;line-height:1.35}
+.slot.bad{animation:shake .4s;border-color:var(--bad);opacity:1}
+.overview .slot.filled:hover{transform:scale(1.7);z-index:10;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--c) 45%,transparent)}50%{box-shadow:0 0 0 7px color-mix(in srgb,var(--c) 0%,transparent)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+@keyframes pop{0%{transform:scale(0)}70%{transform:scale(1.25)}100%{transform:scale(1)}}
+@keyframes throb{0%,100%{transform:scale(.8);opacity:.7}50%{transform:scale(1.3);opacity:1}}
+.badge{position:absolute;right:-9px;top:-9px;width:26px;height:26px;border-radius:50%;background:var(--ok);color:#fff;font:700 15px/26px system-ui;text-align:center;font-style:normal;box-shadow:0 1px 3px rgba(0,0,0,.3);animation:pop .35s}
+.slot .xm,.ghost .xm{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:56px;font-weight:800;color:var(--bad);background:rgba(255,255,255,.55);border-radius:14px}
+.edge{opacity:.45;transition:opacity .4s}
+.edge.on{opacity:1}
+.edge.pending{opacity:1;cursor:pointer;pointer-events:all}
+.edge.sel polyline{stroke-width:4.5}
+.pbtn{position:absolute;z-index:5;width:24px;height:24px;border-radius:50%;border:none;background:#475569;color:#fff;font-weight:700;font-size:14px;line-height:24px;padding:0;animation:throb 1.3s ease-in-out infinite;box-shadow:0 1px 4px rgba(0,0,0,.35)}
+.pbtn:hover{animation-play-state:paused;transform:scale(1.25);background:#334155}
+#tray{position:fixed;left:0;right:0;bottom:0;z-index:30;background:#ece8dd;border-top:1px solid var(--line);padding:6px 14px 0;box-shadow:0 -4px 12px rgba(0,0,0,.06)}
+#tray[hidden]{display:none}
+.trayhead{font-size:12px;color:var(--muted)}
+#cards{display:flex;gap:18px;align-items:flex-start;overflow-x:auto;padding:10px 6px 24px}
+.card{position:relative;flex:none;width:215px;background:#fff;border:2px solid #b9b2a0;border-radius:16px;padding:8px 11px;font-size:12.5px;cursor:grab;touch-action:pan-x;user-select:none;-webkit-user-select:none;box-shadow:0 2px 4px rgba(0,0,0,.08)}
+.card::after{content:"";position:absolute;left:26px;bottom:-9px;width:14px;height:14px;background:#fff;border-right:2px solid #b9b2a0;border-bottom:2px solid #b9b2a0;transform:rotate(45deg)}
+.card.sel{border-color:#1f4e79;box-shadow:0 0 0 3px rgba(31,78,121,.25)}
+.card.dragging{opacity:.3}
+.card.shake{animation:shake .4s}
+.ghost{position:fixed;z-index:100;margin:0;pointer-events:none;box-shadow:0 10px 24px rgba(0,0,0,.28);transform:rotate(-2deg);cursor:grabbing}
+.ghost.bad{border-color:var(--bad)}
+.ghost::after{display:none}
+#toast{position:fixed;left:50%;bottom:calc(var(--th) + 16px);transform:translate(-50%,30px);background:#1f2933;color:#fff;padding:9px 16px;border-radius:10px;opacity:0;pointer-events:none;transition:.25s;z-index:200;max-width:80vw;text-align:center}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+.overlay{position:fixed;inset:0;background:rgba(31,41,51,.55);z-index:150;display:flex;align-items:center;justify-content:center;padding:16px}
+.overlay[hidden]{display:none}
+.dlg{background:#fff;border-radius:20px;max-width:560px;width:100%;padding:22px 24px;box-shadow:0 20px 50px rgba(0,0,0,.35);max-height:92vh;overflow:auto}
+.dlg .tag{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.dlg .chip{display:inline-block;color:#fff;border-radius:10px;padding:1px 9px;font-size:12px;letter-spacing:0;text-transform:none;margin-left:4px}
+.dlg h3{margin:0 0 14px;font-size:18px;line-height:1.35}
+.opt{display:block;width:100%;text-align:left;border:2px solid #cfc9b8;background:#fff;border-radius:12px;padding:10px 14px;margin:0 0 9px;font-size:14.5px}
+.opt:hover:not(:disabled){border-color:#1f4e79;background:#f2f7fc}
+.opt.ok{border-color:var(--ok);background:#eaf6ee}
+.opt.no{border-color:var(--bad);background:#fbecea;color:#7a2a22}
+.opt:disabled{cursor:default}
+#fb{min-height:22px;font-size:14px;margin:4px 0 12px}
+#fb.ok{color:var(--ok)} #fb.no{color:var(--bad)}
+.row{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.dlg.intro{max-width:680px;padding:28px 32px}
+.dlg.intro .tag{font-size:14px;color:#2563a8;letter-spacing:.02em;text-transform:none;font-weight:700;margin-bottom:14px}
+.bigcard{position:relative;background:color-mix(in srgb,#2563a8 10%,#fff);border:3px solid #2563a8;border-radius:22px;padding:20px 24px;font-size:21px;line-height:1.45;margin:0 0 22px}
+.bigcard::after{content:"";position:absolute;left:36px;bottom:-12px;width:20px;height:20px;background:color-mix(in srgb,#2563a8 10%,#fff);border-right:3px solid #2563a8;border-bottom:3px solid #2563a8;transform:rotate(45deg)}
+.dlg.intro p{font-size:16px;margin:0 0 20px}
+.btn.big{font-size:18px;padding:10px 32px;border-radius:12px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Revolution 1848/49 – Wie hängt alles zusammen?</h1>
+  <div class="prog"><span id="progTxt">0 / 11</span><div class="bar"><i id="progBar"></i></div></div>
+  <div class="legend" id="legend"></div>
+  <button class="btn ghosty" id="viewBtn" hidden>Detailansicht</button>
+  <button class="btn" id="pngBtn" hidden>Als Bild speichern</button>
+  <button class="btn ghosty" id="resetBtn">Neu starten</button>
+</header>
+
+<section id="stageWrap"><div id="stageBox"><div id="stage"></div></div></section>
+
+<div id="tray">
+  <div class="trayhead">Bausteine: Ziehe sie auf das passende Feld (oder erst den Baustein antippen, dann das Feld). Richtig = ✓, falsch = ✗.</div>
+  <div id="cards"></div>
+</div>
+
+<div class="overlay" id="startOverlay" hidden>
+  <div class="dlg intro">
+    <div class="tag" id="introTag"></div>
+    <div class="bigcard" id="introCard"></div>
+    <p id="introTxt"></p>
+    <div class="row"><button class="btn big" id="startBtn">Starten</button></div>
+  </div>
+</div>
+
+<div class="overlay" id="qOverlay" hidden>
+  <div class="dlg">
+    <div class="tag" id="qTag"></div>
+    <h3 id="qText"></h3>
+    <div id="opts"></div>
+    <div id="fb"></div>
+    <div class="row"><button class="btn" id="nextBtn" hidden>Weiter</button></div>
+  </div>
+</div>
+
+<div class="overlay" id="endOverlay" hidden>
+  <div class="dlg">
+    <div class="tag">Geschafft</div>
+    <h3>Das Schaubild ist vollständig.</h3>
+    <p id="endTxt"></p>
+    <div class="row">
+      <button class="btn ghosty" id="endClose">Schaubild ansehen</button>
+      <button class="btn" id="endPng">Als Bild speichern</button>
+    </div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+/* =====================  INHALT (hier anpassbar)  ===================== */
+const TITLE = "Revolution 1848/49 – Wie hängt alles zusammen?";
+
+// Startbildschirm: Der Baustein START_ID wird groß gezeigt und nach „Starten“ automatisch ins Schaubild gesetzt.
+const START_ID = 1;
+const INTRO = {
+  tag:  "Ende Februar 1848 in Paris geschah Folgendes:",
+  text: "Heute wollen wir herausfinden, was in der Folge passierte – in Frankreich, im Deutschen Bund, in Österreich, Polen und Ungarn. Baue Schritt für Schritt das Schaubild auf."
+};
+
+// Spalten (Stränge)
+const STRANDS = [
+  {name:"Frankreich",              color:"#2563a8"},
+  {name:"Deutscher Bund / Preußen",color:"#9a6b12"},
+  {name:"Österreich",              color:"#b3392f"},
+  {name:"Polen",                   color:"#2f7d4f"},
+  {name:"Ungarn",                  color:"#7a4bb0"}
+];
+
+// Pfeiltypen
+const TYPES = {
+  "löst aus":      {color:"#c0392b"},
+  "führt zu":      {color:"#1f4e79"},
+  "verschärft":    {color:"#d97706"},
+  "Reaktion auf":  {color:"#0f766e"},
+  "zeitgleich":    {color:"#6b7280", dash:true, double:true},
+  "Gegenreaktion": {color:"#9d174d"}
+};
+
+// Bausteine: col = Strang (Spalte), row = Zeitverlauf (Zeile)
+// q = Frage nach dem Baustein (nur wenn er höchstens einen ausgehenden Pfeil hat).
+// Bei Abzweigungen (mehrere ausgehende Pfeile) hängt die Frage am jeweiligen Pfeil (siehe EDGES).
+// In jeder Frage ist die ERSTE Antwort die richtige (wird beim Anzeigen gemischt).
+const NODES = [
+ {id:1, col:0,row:0, text:"Ende Februar 1848 stürzen Arbeiter und Studenten in Paris den König. Frankreich wird Republik, alle Männer über 21 dürfen wählen.",
+  q:{t:"In Paris siegt die Revolution. Was bewirkt diese Nachricht wohl bei unzufriedenen Menschen im Deutschen Bund?",
+     o:[["Sie fühlen sich ermutigt und fordern ebenfalls mehr Rechte.","Genau: Der Erfolg in Paris wirkt wie ein Signal – das zeigt der nächste Baustein."],
+        ["Sie bleiben ruhig, weil sie keine Veränderung wollen.","Gerade im Deutschen Bund war die Unzufriedenheit groß."],
+        ["Sie wollen den französischen König ins Land holen.","Der König wurde ja gerade vertrieben."]]}},
+ {id:2, col:1,row:1, text:"Die Nachricht aus Paris macht vielen Deutschen Mut: Bürger fordern auf Versammlungen ein gemeinsames Parlament sowie Presse- und Meinungsfreiheit.",
+  q:{t:"Bürger fordern politische Rechte. Wer schließt sich dieser Bewegung noch an – und warum?",
+     o:[["Handwerker und Arbeiter, die höhere Löhne und günstigere Nahrungsmittel wollen.","Richtig: Schlechte Ernten machten Lebensmittel teuer – soziale Not verstärkt den politischen Protest."],
+        ["Adlige, die ihre Steuern senken wollen.","Im Text gehen Handwerker und Arbeiter auf die Straße, nicht der Adel."],
+        ["Soldaten, die mehr Sold fordern.","Die Soldaten stehen eher auf der Seite der Herrscher."]]}},
+ {id:3, col:1,row:2, text:"Auch Handwerker und Arbeiter gehen auf die Straße. Sie fordern höhere Löhne und günstigere Nahrungsmittel, denn die Ernten waren schlecht."},
+ {id:4, col:1,row:3, text:"Um ihre Macht zu retten, erfüllen viele Fürsten diese „Märzforderungen“ und nehmen liberale Bürger in ihre Regierungen auf.",
+  q:{t:"Nicht überall bringt das Nachgeben Ruhe. Warum ist der preußische König in Berlin am 18. März so unschlüssig?",
+     o:[["Er will nicht auf sein Volk schießen lassen, fürchtet aber, Macht zu verlieren.","Genau – er schwankt zwischen Gewaltverzicht und Angst vor dem Machtverlust."],
+        ["Er kennt die Forderungen der Demonstranten nicht.","Die Forderungen sind bekannt, er weiß nur nicht, wie er reagieren soll."],
+        ["Er hat schon beschlossen abzudanken.","Nein, er will seine königlichen Vorrechte nicht aufgeben."]]}},
+ {id:5, col:2,row:2, text:"In Wien siegen die Barrikadenkämpfer. Staatskanzler Metternich tritt zurück, der Kaiser flieht mit seinem Hof aus der Stadt.",
+  q:{t:"In Wien tritt Metternich zurück, der Kaiser flieht. Welches besondere Problem hat Österreich zusätzlich?",
+     o:[["Es ist ein Vielvölkerstaat, in dem viele Nationalitäten Selbstständigkeit fordern.","Genau: Die Revolution trifft hier auf viele Völker mit eigenen Zielen."],
+        ["Es hat keine Soldaten mehr.","Davon ist im Text nicht die Rede."],
+        ["Es besteht nur aus Deutschsprachigen.","Im Gegenteil: Tschechen, Slowenen, Kroaten und andere leben dort."]]}},
+ {id:6, col:2,row:3, text:"Der Vielvölkerstaat Österreich droht zu zerbrechen: Tschechen, Slowenen, Kroaten, Italiener und andere fordern Selbstständigkeit.",
+  q:{t:"Viele Völker wollen eigene Staaten. Welches Volk, das seit 1795 zwischen Großmächten aufgeteilt ist, strebt ebenfalls nach einem Staat?",
+     o:[["Die Polen","Genau – Polen existierte seit 1795 de facto nicht mehr als Staat."],
+        ["Die Franzosen","Frankreich ist längst ein Staat – 1848 sogar eine Republik."],
+        ["Die Schweizer","Die Schweiz ist ein unabhängiger Staat."]]}},
+ {id:7, col:3,row:3, text:"Polen ist seit 1795 zwischen Russland, Preußen und Österreich aufgeteilt. Die Polen wünschen sich wieder einen eigenen Nationalstaat."},
+ {id:8, col:4,row:3, text:"Auch Ungarn, das zum Kaisertum Österreich gehört, will einen eigenen Nationalstaat mit gewähltem Parlament.",
+  q:{t:"Polen und Ungarn verbindet etwas. Was wollen beide?",
+     o:[["Einen eigenen Nationalstaat.","Richtig: Der Wunsch nach nationaler Selbstständigkeit ist ein Hauptmotiv von 1848."],
+        ["Zurück zur uneingeschränkten Herrschaft der Könige.","Beide wollen gerade mehr Freiheit und Mitbestimmung."],
+        ["Einen Anschluss an Frankreich.","Davon ist nirgends die Rede."]]}},
+ {id:9, col:3,row:4, text:"Der preußische König zeigt zunächst Zustimmung für einen polnischen Staat. Die Deutschen im Osten Preußens lehnen ihn jedoch ab.",
+  q:{t:"Preußen unterstützt die Polen zunächst, doch die Deutschen im Osten sind dagegen. Warum?",
+     o:[["Sie fürchten, in einen polnischen Staat eingegliedert zu werden.","Genau – Nationalstaaten können sich gegenseitig im Weg stehen."],
+        ["Sie sind grundsätzlich gegen jede Veränderung.","Entscheidend ist ihre Sorge, selbst Teil eines polnischen Staates zu werden."],
+        ["Sie wollen lieber zu Russland gehören.","Davon ist nicht die Rede."]]}},
+ {id:10,col:1,row:4, text:"Am 18. März gibt es in Berlin Unruhen. Der unschlüssige König Friedrich Wilhelm IV. schafft die Zensur ab und verspricht eine Verfassung.",
+  q:{t:"Der König macht erste Zugeständnisse. Was geschieht kurz danach in Berlin?",
+     o:[["Es kommt erneut zu Kämpfen mit Barrikaden und Toten.","Genau – die Lage eskaliert, bevor sie sich beruhigt."],
+        ["Alle gehen friedlich nach Hause, die Revolution ist vorbei.","Zunächst nicht: Es kommt zu neuen Kämpfen."],
+        ["Der König tritt sofort zurück.","Er bleibt König."]]}},
+ {id:11,col:1,row:5, text:"Trotzdem kommt es erneut zu Kämpfen, Barrikaden werden gebaut, es gibt Tote. Der König erweist den Toten die Ehre; die Revolution scheint gesiegt.",
+  q:{t:"Rückblick: Warum spricht man von einem „europäischen Völkerfrühling“?",
+     o:[["Von Paris aus erfasst die Revolutionswelle viele Staaten Europas, mit großen Hoffnungen auf Freiheit und Einheit.","Genau – viele Staaten, viele Hoffnungen, fast zeitgleich."],
+        ["Weil die Bewegung auf Frankreich beschränkt blieb.","Die Bewegung ergriff viele Staaten Europas."],
+        ["Weil die Ernten im Frühling besonders gut waren.","Im Gegenteil: schlechte Ernten verschärften die Not."]]}}
+];
+
+// Pfeile (zeigen von Baustein A auf Baustein B; Beschriftung vorgegeben).
+// Mit q: Frage erscheint erst, wenn der Pfeil angeklickt wird (nur an Abzweigungen).
+const EDGES = [
+  {from:1, to:2, type:"löst aus"},
+  {from:2, to:3, type:"verschärft"},
+  {from:3, to:4, type:"Reaktion auf",
+   q:{t:"Der Druck auf die Herrscher wächst. Was tun viele Fürsten, um ihre Herrschaft zu retten?",
+      o:[["Sie erfüllen einige Forderungen und nehmen Liberale in die Regierung auf.","Genau – das sind die „Märzforderungen“."],
+         ["Sie lassen alle Proteste sofort vom Militär beenden.","Das versuchen manche, aber viele Fürsten geben zunächst nach."],
+         ["Sie treten geschlossen zurück.","Sie wollen ihre Herrschaft ja gerade retten."]]}},
+  {from:3, to:5, type:"zeitgleich",
+   q:{t:"Auch in der Hauptstadt Österreichs kommt es zeitgleich zum Umsturz. Wer verliert dort die Kontrolle?",
+      o:[["Staatskanzler Metternich und der Kaiser","Genau: Metternich tritt zurück, der Kaiser flieht aus der Stadt."],
+         ["Der französische König","Der wurde in Paris gestürzt – das ist ein anderer Schauplatz."],
+         ["Der preußische König","Preußen ist ein anderer Staat; der König wird erst später in Berlin bedrängt."]]}},
+  {from:5, to:6, type:"führt zu"},
+  {from:6, to:7, type:"zeitgleich"},
+  {from:7, to:8, type:"zeitgleich",
+   q:{t:"Auch innerhalb Österreichs strebt zeitgleich ein Land nach Unabhängigkeit – mit liberaler Verfassung und Parlament. Welches?",
+      o:[["Ungarn","Richtig. Ungarn gehörte zum Kaisertum Österreich."],
+         ["Bayern","Bayern gehört zum Deutschen Bund, nicht zum Kaisertum Österreich."],
+         ["Schweden","Schweden spielt hier keine Rolle."]]}},
+  {from:7, to:9, type:"Gegenreaktion",
+   q:{t:"Der polnische Wunsch nach einem Staat löst in Preußen eine Gegenreaktion aus. Wer könnte dagegen sein?",
+      o:[["Die Deutschen im Osten Preußens, die in einem polnischen Staat leben müssten","Genau – sie fürchten, ihre Heimat zu verlieren."],
+         ["Die Polen selbst","Die Polen wünschen sich ja gerade einen eigenen Staat."],
+         ["Die französische Republik","Frankreich ist hier nicht betroffen."]]}},
+  {from:4, to:10,type:"führt zu"},
+  {from:10,to:11,type:"löst aus"}
+];
+
+/* =====================  PROGRAMM  ===================== */
+const W=200,H=146,GX=72,GY=40,PAD=20,TOP=44;
+const ROWS=Math.max(...NODES.map(n=>n.row))+1;
+const NATW=PAD*2+STRANDS.length*W+(STRANDS.length-1)*GX;
+const NATH=TOP+ROWS*H+(ROWS-1)*GY+PAD;
+const byId={}; NODES.forEach(n=>byId[n.id]=n);
+EDGES.forEach((e,i)=>e.i=i);
+const $=s=>document.querySelector(s);
+const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const mctx=document.createElement('canvas').getContext('2d');
+function pillW(t){mctx.font='600 11px system-ui,sans-serif';return Math.ceil(mctx.measureText(t).width)+16}
+
+let placed,nodeDone,edgeDone,mistakes,selected,busy,drag,finished,overview;
+let slotEl={},cardEl={};
+
+const outs=id=>EDGES.filter(e=>e.from===id);
+const ins=id=>EDGES.filter(e=>e.to===id);
+function slotXY(n){return {x:PAD+n.col*(W+GX), y:TOP+n.row*(H+GY)}}
+function geom(e){
+  const a=byId[e.from],b=byId[e.to],A=slotXY(a),B=slotXY(b);let pts,lab,horiz=false;
+  if(a.col===b.col){const x=A.x+W/2;pts=[[x,A.y+H+2],[x,B.y-2]];lab=[x,(A.y+H+B.y)/2]}
+  else if(a.row===b.row){const y=A.y+H/2;pts=[[A.x+W+2,y],[B.x-2,y]];lab=[(A.x+W+B.x)/2,y];horiz=true}
+  else{const x1=A.x+W/2,x2=B.x+W/2,m=A.y+H+GY/2;pts=[[x1,A.y+H+2],[x1,m],[x2,m],[x2,B.y-2]];lab=[(x1+x2)/2,m]}
+  return {pts,lab,horiz};
+}
+function head(tip,from){
+  const dx=tip[0]-from[0],dy=tip[1]-from[1],l=Math.hypot(dx,dy)||1,ux=dx/l,uy=dy/l,nx=-uy,ny=ux;
+  const bx=tip[0]-ux*10,by=tip[1]-uy*10;
+  return [tip,[bx+nx*5,by+ny*5],[bx-nx*5,by-ny*5]];
+}
+function heads(e,pts){
+  const t=TYPES[e.type],n=pts.length,h=[head(pts[n-1],pts[n-2])];
+  if(t.double)h.push(head(pts[0],pts[1]));
+  return h;
+}
+
+function build(){
+  placed=new Set();nodeDone=new Set();edgeDone=new Set();mistakes=0;selected=null;busy=false;finished=false;overview=false;
+  document.body.classList.remove('overview');
+  slotEl={};cardEl={};
+  const stage=$('#stage');
+  stage.style.width=NATW+'px';stage.style.height=NATH+'px';
+  let html='';
+  STRANDS.forEach((s,i)=>{html+=`<div class="colhead" style="left:${PAD+i*(W+GX)}px;width:${W}px;background:${s.color}">${esc(s.name)}</div>`});
+  let svg=`<svg width="${NATW}" height="${NATH}" viewBox="0 0 ${NATW} ${NATH}">`;
+  EDGES.forEach((e,i)=>{
+    const t=TYPES[e.type],g=geom(e),pw=pillW(e.type);
+    svg+=`<g class="edge" id="edge${i}" data-i="${i}" fill="${t.color}" stroke="${t.color}">`+
+      `<polyline points="${g.pts.map(p=>p.join(',')).join(' ')}" fill="none" stroke-width="2.5" ${t.dash?'stroke-dasharray="6 4"':''} stroke-linejoin="round"/>`+
+      heads(e,g.pts).map(h=>`<polygon points="${h.map(p=>p.join(',')).join(' ')}" stroke="none"/>`).join('')+
+      `<rect x="${g.lab[0]-pw/2}" y="${g.lab[1]-9}" width="${pw}" height="18" rx="9" fill="#fff" stroke-width="1.5"/>`+
+      `<text x="${g.lab[0]}" y="${g.lab[1]+4}" text-anchor="middle" font-size="11" font-weight="600" stroke="none" font-family="system-ui,sans-serif">${esc(e.type)}</text></g>`;
+  });
+  svg+='</svg>';
+  stage.innerHTML=svg+html;
+  EDGES.forEach((e,i)=>{ document.getElementById('edge'+i).addEventListener('click',()=>{ if(isPending(e)) askEdge(e) }) });
+  NODES.forEach(n=>{
+    const p=slotXY(n),d=document.createElement('div');
+    d.className='slot';d.dataset.id=n.id;d.textContent='?';
+    d.style.cssText=`left:${p.x}px;top:${p.y}px;width:${W}px;height:${H}px;--c:${STRANDS[n.col].color}`;
+    d.addEventListener('click',()=>{ if(selected&&!busy) attempt(selected,d); });
+    stage.appendChild(d);slotEl[n.id]=d;
+  });
+  const cards=$('#cards');cards.innerHTML='';
+  shuffle(NODES).forEach(n=>{
+    const c=document.createElement('div');c.className='card';c.dataset.id=n.id;c.textContent=n.text;
+    c.addEventListener('pointerdown',e=>pdown(e,n.id,c));
+    if(n.id!==START_ID)cards.appendChild(c);
+    cardEl[n.id]=c;
+  });
+  $('#tray').hidden=false;
+  $('#pngBtn').hidden=true;$('#viewBtn').hidden=true;
+  refresh();fit();scrollTo(0,0);
+  // Startbildschirm
+  busy=true;
+  $('#introTag').textContent=INTRO.tag;
+  $('#introCard').textContent=byId[START_ID].text;
+  $('#introTxt').textContent=INTRO.text;
+  $('#startOverlay').hidden=false;
+}
+function start(){
+  $('#startOverlay').hidden=true;busy=false;
+  reveal(slotEl[START_ID]);
+  setTimeout(()=>place(START_ID),350);
+}
+
+/* Freischaltlogik: Ein Feld ist offen, wenn alle eingehenden Pfeile "beantwortet" sind. */
+const isOpen=id=>!placed.has(id)&&ins(id).every(e=>edgeDone.has(e.i));
+const isPending=e=>!!e.q&&placed.has(e.from)&&!edgeDone.has(e.i);
+const pending=()=>EDGES.filter(isPending);
+
+function refresh(){
+  NODES.forEach(n=>slotEl[n.id].classList.toggle('open',isOpen(n.id)));
+  EDGES.forEach((e,i)=>{const g=document.getElementById('edge'+i);g.classList.toggle('on',placed.has(e.from)&&placed.has(e.to));g.classList.toggle('pending',isPending(e))});
+  document.querySelectorAll('.pbtn').forEach(b=>b.remove());
+  pending().forEach(e=>{
+    const g=geom(e),b=document.createElement('button');b.className='pbtn';b.textContent='?';b.title='Klicken: Frage zu diesem Pfeil';
+    const x=g.horiz?g.lab[0]-12:g.lab[0]+pillW(e.type)/2+10, y=g.horiz?g.lab[1]-38:g.lab[1]-12;
+    b.style.left=x+'px';b.style.top=y+'px';
+    b.addEventListener('click',()=>askEdge(e));
+    $('#stage').appendChild(b);
+  });
+  $('#progTxt').textContent=`${placed.size} / ${NODES.length}`;
+  $('#progBar').style.width=(100*placed.size/NODES.length)+'%';
+  fit();
+}
+function fit(){
+  const hh=$('header').offsetHeight,tray=$('#tray');
+  document.documentElement.style.setProperty('--hh',hh+'px');
+  document.documentElement.style.setProperty('--th',(tray.hidden?0:tray.offsetHeight)+'px');
+  const availW=$('#stageWrap').clientWidth-24;
+  let s=Math.min(1,availW/NATW);
+  if(overview){const availH=innerHeight-hh-24;s=Math.min(s,availH/NATH)}
+  else s=Math.max(.55,s);
+  $('#stage').style.transform=`scale(${s})`;
+  $('#stageBox').style.width=NATW*s+'px';$('#stageBox').style.height=NATH*s+'px';
+}
+addEventListener('resize',fit);
+function reveal(el){
+  const hh=$('header').offsetHeight,th=$('#tray').hidden?0:$('#tray').offsetHeight;
+  const r=el.getBoundingClientRect();
+  scrollTo({top:scrollY+r.top+r.height/2-(hh+(innerHeight-hh-th)/2),behavior:'smooth'});
+}
+
+let toastT;
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2800)}
+
+/* ---------- Ziehen & Ablegen ---------- */
+function pdown(e,id,card){
+  if(busy||placed.has(id)||(e.button&&e.button>0))return;
+  const r=card.getBoundingClientRect();
+  drag={id,card,pid:e.pointerId,sx:e.clientX,sy:e.clientY,ox:e.clientX-r.left,oy:e.clientY-r.top,w:r.width,started:false,ghost:null,x:e.clientX,y:e.clientY,hover:null};
+}
+addEventListener('pointermove',e=>{
+  if(!drag||e.pointerId!==drag.pid)return;
+  drag.x=e.clientX;drag.y=e.clientY;
+  if(!drag.started){
+    if(Math.hypot(e.clientX-drag.sx,e.clientY-drag.sy)<6)return;
+    drag.started=true;
+    const g=drag.card.cloneNode(true);g.classList.add('ghost');g.classList.remove('sel');g.style.width=drag.w+'px';
+    document.body.appendChild(g);drag.ghost=g;drag.card.classList.add('dragging');
+    requestAnimationFrame(loop);
+  }
+  moveGhost();e.preventDefault();
+},{passive:false});
+function moveGhost(){
+  drag.ghost.style.left=(drag.x-drag.ox)+'px';drag.ghost.style.top=(drag.y-drag.oy)+'px';
+  const s=slotAt(drag.x,drag.y);
+  if(s!==drag.hover){drag.hover&&drag.hover.classList.remove('hover');drag.hover=s;s&&!s.classList.contains('filled')&&s.classList.add('hover')}
+}
+function loop(){
+  if(!drag||!drag.started)return;
+  const hh=$('header').offsetHeight,tt=$('#tray').getBoundingClientRect().top;
+  if(drag.y<hh+50)scrollBy(0,-14);else if(drag.y>tt-40&&drag.y<tt)scrollBy(0,14);
+  moveGhost();requestAnimationFrame(loop);
+}
+function slotAt(x,y){const el=document.elementFromPoint(x,y);return el&&el.closest?el.closest('.slot'):null}
+addEventListener('pointerup',e=>{
+  if(!drag||e.pointerId!==drag.pid)return;
+  const d=drag;drag=null;
+  if(!d.started){
+    const was=selected===d.id;clearSel();
+    if(!was){selected=d.id;d.card.classList.add('sel')}
+    return;
+  }
+  d.hover&&d.hover.classList.remove('hover');
+  attempt(d.id,slotAt(e.clientX,e.clientY),d);
+});
+addEventListener('pointercancel',e=>{
+  if(!drag||e.pointerId!==drag.pid)return;
+  const d=drag;drag=null;
+  if(d.started)flyBack(d,false);
+});
+function clearSel(){selected=null;document.querySelectorAll('.card.sel').forEach(c=>c.classList.remove('sel'))}
+
+function flyBack(d,bad){
+  const g=d.ghost;
+  if(!g){d.card.classList.add('shake');setTimeout(()=>d.card.classList.remove('shake'),450);return}
+  if(bad){g.classList.add('bad');g.insertAdjacentHTML('beforeend','<div class="xm">✗</div>')}
+  setTimeout(()=>{
+    const r=d.card.getBoundingClientRect();
+    g.style.transition='left .35s ease,top .35s ease,transform .35s';
+    g.style.left=r.left+'px';g.style.top=r.top+'px';g.style.transform='rotate(0)';
+    setTimeout(()=>{g.remove();d.card.classList.remove('dragging')},380);
+  },bad?450:0);
+}
+
+function attempt(id,slot,d){
+  d=d||{id,card:cardEl[id],ghost:null};
+  if(!slot){flyBack(d,false);return}
+  const sid=+slot.dataset.id;
+  if(placed.has(sid)){toast('Dieses Feld ist schon belegt.');flyBack(d,false);return}
+  if(sid===id&&isOpen(sid)){
+    if(d.ghost)d.ghost.remove();
+    clearSel();place(id);return;
+  }
+  mistakes++;
+  if(sid===id)toast(pending().length?'Richtig, aber dieses Feld ist noch nicht frei. Klicke zuerst auf den blinkenden Button am Pfeil.':'Richtiger Baustein, aber dieses Feld ist noch nicht dran. Lege zuerst die vorherigen Bausteine.');
+  else toast('Das passt hier nicht. Achte auf den Strang (Farbe) und auf die Pfeile.');
+  slot.classList.add('bad');slot.insertAdjacentHTML('beforeend','<div class="xm">✗</div>');
+  setTimeout(()=>{slot.classList.remove('bad');const x=slot.querySelector('.xm');x&&x.remove()},900);
+  flyBack(d,true);
+}
+
+function place(id){
+  const n=byId[id],s=slotEl[id];
+  placed.add(id);
+  s.classList.add('filled');s.classList.remove('open');
+  s.innerHTML=`<span>${esc(n.text)}</span><i class="badge">✓</i>`;
+  cardEl[id].remove();
+  refresh();
+  if(n.q){busy=true;setTimeout(()=>askQuestion(n.q,{node:n}),750)}
+  else if(!outs(id).length){ nodeDone.add(id) }
+  else{ // Abzweigung: Frage erst nach Klick auf einen Pfeil
+    const p=pending();
+    if(p.length){toast('Abzweigung: Klicke auf einen blinkenden Button an den Pfeilen.');
+      setTimeout(()=>{const b=document.querySelector('.pbtn');b&&reveal(b)},500)}
+  }
+}
+
+/* ---------- Fragen ---------- */
+function askEdge(e){
+  if(busy)return;
+  busy=true;
+  document.getElementById('edge'+e.i).classList.add('sel');
+  askQuestion(e.q,{edge:e});
+}
+function askQuestion(q,ctx){
+  const tag=$('#qTag');
+  if(ctx.edge){const c=TYPES[ctx.edge.type].color;tag.innerHTML=`Frage zum Pfeil <span class="chip" style="background:${c}">${esc(ctx.edge.type)}</span>`}
+  else tag.textContent=outs(ctx.node.id).length?'Frage zum nächsten Baustein':'Frage';
+  $('#qText').textContent=q.t;
+  const box=$('#opts');box.innerHTML='';$('#fb').textContent='';$('#fb').className='';
+  const nb=$('#nextBtn');nb.hidden=true;
+  shuffle(q.o.map((o,i)=>({t:o[0],f:o[1],ok:i===0}))).forEach(o=>{
+    const b=document.createElement('button');b.className='opt';b.textContent=o.t;
+    b.addEventListener('click',()=>{
+      if(o.ok){
+        b.classList.add('ok');box.querySelectorAll('.opt').forEach(x=>x.disabled=true);
+        $('#fb').className='ok';$('#fb').textContent='✓ '+o.f;nb.hidden=false;nb.focus();
+      }else{
+        mistakes++;b.classList.add('no');b.disabled=true;
+        $('#fb').className='no';$('#fb').textContent='✗ '+o.f+' Versuche es noch einmal.';
+      }
+    });
+    box.appendChild(b);
+  });
+  nb.textContent=(ctx.node&&ctx.node.id===11)?'Fertig':'Weiter';
+  nb.onclick=()=>closeQuestion(ctx);
+  $('#qOverlay').hidden=false;
+}
+function closeQuestion(ctx){
+  const before=new Set(NODES.filter(x=>isOpen(x.id)).map(x=>x.id));
+  if(ctx.node){nodeDone.add(ctx.node.id);outs(ctx.node.id).forEach(e=>edgeDone.add(e.i))}
+  else{
+    edgeDone.add(ctx.edge.i);
+    document.getElementById('edge'+ctx.edge.i).classList.remove('sel');
+    if(outs(ctx.edge.from).every(e=>edgeDone.has(e.i)))nodeDone.add(ctx.edge.from);
+  }
+  $('#qOverlay').hidden=true;busy=false;refresh();
+  if(nodeDone.size===NODES.length&&placed.size===NODES.length){finish();return}
+  const fresh=NODES.filter(x=>isOpen(x.id)&&!before.has(x.id));
+  if(fresh.length)reveal(slotEl[fresh[0].id]);
+  else{const b=document.querySelector('.pbtn');b&&reveal(b)}
+}
+function finish(){
+  finished=true;overview=true;document.body.classList.add('overview');
+  $('#tray').hidden=true;
+  $('#pngBtn').hidden=false;$('#viewBtn').hidden=false;$('#viewBtn').textContent='Detailansicht';
+  fit();scrollTo(0,0);
+  $('#endTxt').textContent=mistakes===0
+    ?'Alle Bausteine und Fragen ohne Fehlversuch – stark! Das Schaubild zeigt, wie Ursachen und Folgen zwischen den Ländern zusammenhängen.'
+    :`Du hast das ganze Schaubild gelegt (${mistakes} Fehlversuch${mistakes===1?'':'e'}). Es zeigt, wie Ursachen und Folgen zwischen den Ländern zusammenhängen.`;
+  $('#endOverlay').hidden=false;
+}
+
+/* ---------- Export als Bild ---------- */
+function mix(hex,p){const n=parseInt(hex.slice(1),16),r=n>>16,g=n>>8&255,b=n&255,m=c=>Math.round(c*p+255*(1-p));return `rgb(${m(r)},${m(g)},${m(b)})`}
+function rr(x,a,b,w,h,r){x.beginPath();x.moveTo(a+r,b);x.arcTo(a+w,b,a+w,b+h,r);x.arcTo(a+w,b+h,a,b+h,r);x.arcTo(a,b+h,a,b,r);x.arcTo(a,b,a+w,b,r);x.closePath()}
+function wrap(x,t,mw){const out=[];let line='';t.split(' ').forEach(w=>{const tt=line?line+' '+w:w;if(x.measureText(tt).width>mw&&line){out.push(line);line=w}else line=tt});out.push(line);return out}
+function exportPNG(){
+  const S=2,TH=44,c=document.createElement('canvas');c.width=NATW*S;c.height=(NATH+TH)*S;
+  const x=c.getContext('2d');x.scale(S,S);x.fillStyle='#fff';x.fillRect(0,0,NATW,NATH+TH);
+  x.fillStyle='#1f2933';x.font='700 18px system-ui,sans-serif';x.textAlign='left';x.fillText(TITLE,PAD,28);
+  x.translate(0,TH);
+  STRANDS.forEach((s,i)=>{x.fillStyle=s.color;rr(x,PAD+i*(W+GX),0,W,28,14);x.fill();x.fillStyle='#fff';x.font='700 13px system-ui,sans-serif';x.textAlign='center';x.fillText(s.name,PAD+i*(W+GX)+W/2,18)});
+  EDGES.forEach(e=>{
+    const t=TYPES[e.type],g=geom(e),pw=pillW(e.type);
+    x.strokeStyle=t.color;x.fillStyle=t.color;x.lineWidth=2.5;x.lineJoin='round';x.setLineDash(t.dash?[6,4]:[]);
+    x.beginPath();g.pts.forEach((p,i)=>i?x.lineTo(p[0],p[1]):x.moveTo(p[0],p[1]));x.stroke();x.setLineDash([]);
+    heads(e,g.pts).forEach(h=>{x.beginPath();x.moveTo(...h[0]);x.lineTo(...h[1]);x.lineTo(...h[2]);x.closePath();x.fill()});
+    x.fillStyle='#fff';rr(x,g.lab[0]-pw/2,g.lab[1]-9,pw,18,9);x.fill();x.lineWidth=1.5;x.stroke();
+    x.fillStyle=t.color;x.font='600 11px system-ui,sans-serif';x.textAlign='center';x.fillText(e.type,g.lab[0],g.lab[1]+4);
+  });
+  NODES.forEach(n=>{
+    const p=slotXY(n),col=STRANDS[n.col].color,ok=placed.has(n.id);
+    x.setLineDash(ok?[]:[6,4]);x.lineWidth=2;x.strokeStyle=ok?col:mix(col,.4);x.fillStyle=ok?mix(col,.13):mix(col,.05);
+    rr(x,p.x,p.y,W,H,16);x.fill();x.stroke();x.setLineDash([]);
+    if(!ok)return;
+    x.fillStyle='#1f2933';x.font='13px system-ui,sans-serif';x.textAlign='left';
+    wrap(x,n.text,W-26).forEach((l,i)=>x.fillText(l,p.x+12,p.y+23+i*17.6));
+  });
+  c.toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='revolution-1848-schaubild.png';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)});
+}
+
+/* ---------- Start ---------- */
+$('#legend').innerHTML=Object.entries(TYPES).map(([k,t])=>`<span><b style="color:${t.color}">${t.double?'↔':'→'}</b>${esc(k)}</span>`).join('');
+$('#resetBtn').onclick=()=>{ if(!placed.size||confirm('Neu starten? Der bisherige Fortschritt geht verloren.')){$('#qOverlay').hidden=true;$('#endOverlay').hidden=true;build()} };
+$('#pngBtn').onclick=$('#endPng').onclick=exportPNG;
+$('#startBtn').onclick=start;
+$('#endClose').onclick=()=>$('#endOverlay').hidden=true;
+$('#viewBtn').onclick=()=>{overview=!overview;document.body.classList.toggle('overview',overview);$('#viewBtn').textContent=overview?'Detailansicht':'Übersicht';fit();scrollTo(0,0)};
+build();
+</script>
+</body>
+</html>
